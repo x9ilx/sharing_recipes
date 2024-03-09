@@ -113,7 +113,7 @@ class ShoppingList(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'user'],
-                name='recipe-user',
+                name='shopping-list-recipe-user',
             )
         ]
 
@@ -138,6 +138,31 @@ class Favorite(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'user'],
-                name='recipe-user',
+                name='favorite-recipe-user',
+            )
+        ]
+
+
+class Subscribe(models.Model):
+    author = models.ForeignKey(
+        user_model,
+        verbose_name='Пользователь',
+        on_delete=models.CASCADE,
+        related_name='subscribe',
+    )
+    user = models.ForeignKey(
+        user_model,
+        verbose_name='Пользователь',
+        on_delete=models.CASCADE,
+        related_name='+',
+    )
+
+    class Meta:
+        verbose_name = 'Подписки пользователей'
+        verbose_name_plural = 'Подписки пользователей'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'user'],
+                name='user-user',
             )
         ]
