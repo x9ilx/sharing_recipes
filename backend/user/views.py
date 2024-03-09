@@ -4,4 +4,6 @@ from .permissions import BlockAnonymousUserMe
 
 
 class FoodgramUserViewSet(UserViewSet):
-    permission_classes = [BlockAnonymousUserMe, ]
+    permission_classes = [
+        BlockAnonymousUserMe,
+    ]
