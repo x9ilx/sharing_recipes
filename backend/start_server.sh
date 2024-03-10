@@ -10,7 +10,7 @@ echo '------------------------------------------------'
 echo '------------------------------------------------'
 echo 'START COLLECT STATIC'
 echo '------------------------------------------------'
-python manage.py collectstatic
+python manage.py collectstatic --noinput
 cp -r /app/collected_static/. /static/static/
 echo '------------------------------------------------'
 echo 'END COLLECT STATIC'

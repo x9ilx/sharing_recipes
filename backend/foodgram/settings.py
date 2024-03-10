@@ -1,13 +1,12 @@
 import os
 from pathlib import Path
 
-import dotenv
+from dotenv import read_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-dotenv.read_dotenv(BASE_DIR.parent / '.env')
-
+read_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -122,8 +121,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
+STATIC_ROOT = BASE_DIR / 'collected_static'
 
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'collected_static'),
+#     os.path.join(BASE_DIR, 'css')
+# ]
 
 MEDIA_URL = '/media/'
 

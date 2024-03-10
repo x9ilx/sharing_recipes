@@ -1,5 +1,3 @@
-from dataclasses import field
-
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as BaseUserSerializer
 from rest_framework import serializers
@@ -33,4 +31,5 @@ class UserSerializer(BaseUserSerializer):
 
     def get_is_subscribed(self, obj):
         current_user = self.context['request'].user
-        return False
+        subscribe = current_user.subscribes.filter(author=obj).exists()
+        return subscribe

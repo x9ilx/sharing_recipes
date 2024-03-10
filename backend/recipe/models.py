@@ -1,6 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.db import models
 
 user_model = get_user_model()
 
@@ -50,7 +49,9 @@ class Recipe(models.Model):
     name = models.CharField('Наименование', max_length=200)
     text = models.TextField('Описание')
     cooking_time = models.PositiveIntegerField('Время приготовления (минуты)')
-    image = models.ImageField(upload_to='recipe/images/')
+    image = models.ImageField(
+        upload_to='recipe/images/', verbose_name='Файл с изображением'
+    )
     tags = models.ManyToManyField(Tag, verbose_name='Тэги')
     ingredients = models.ManyToManyField(
         Ingredient, verbose_name='Ингредиенты', through='RecipeIngredients'
@@ -72,7 +73,7 @@ class RecipeIngredients(models.Model):
         Recipe,
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
-        related_name='ingredients',
+        related_name='recipe_ingredients',
     )
     ingredient = models.ForeignKey(
         Ingredient,
@@ -89,80 +90,5 @@ class RecipeIngredients(models.Model):
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='recipe-ingredient',
-            )
-        ]
-
-
-class ShoppingList(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        verbose_name='Рецепт',
-        on_delete=models.CASCADE,
-        related_name='+',
-    )
-    user = models.ForeignKey(
-        user_model,
-        verbose_name='Пользователь',
-        on_delete=models.CASCADE,
-        related_name='shopping_list',
-    )
-
-    class Meta:
-        verbose_name = 'Список покупок пользователей'
-        verbose_name_plural = 'Списки покупок пользователей'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'user'],
-                name='shopping-list-recipe-user',
-            )
-        ]
-
-
-class Favorite(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        verbose_name='Рецепт',
-        on_delete=models.CASCADE,
-        related_name='+',
-    )
-    user = models.ForeignKey(
-        user_model,
-        verbose_name='Пользователь',
-        on_delete=models.CASCADE,
-        related_name='shopping_list',
-    )
-
-    class Meta:
-        verbose_name = 'Избранный рецепт пользователей'
-        verbose_name_plural = 'Избранные рецепты пользователей'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'user'],
-                name='favorite-recipe-user',
-            )
-        ]
-
-
-class Subscribe(models.Model):
-    author = models.ForeignKey(
-        user_model,
-        verbose_name='Пользователь',
-        on_delete=models.CASCADE,
-        related_name='subscribe',
-    )
-    user = models.ForeignKey(
-        user_model,
-        verbose_name='Пользователь',
-        on_delete=models.CASCADE,
-        related_name='+',
-    )
-
-    class Meta:
-        verbose_name = 'Подписки пользователей'
-        verbose_name_plural = 'Подписки пользователей'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['author', 'user'],
-                name='user-user',
             )
         ]
