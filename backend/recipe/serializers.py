@@ -3,7 +3,7 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from recipe.models import Tag
+from recipe.models import Ingredient, MeasurimentUnit, Tag
 from user.serializers import UserSerializer
 
 
@@ -26,4 +26,24 @@ class TagSerializer(serializers.ModelSerializer):
             'name',
             'color',
             'slug',
+        ]
+
+
+class MeasurementUnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MeasurimentUnit
+        fields = [
+            'id',
+            'name',
+        ]
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    measurement_unit = serializers.StringRelatedField()
+    class Meta:
+        model = Ingredient
+        fields = [
+            'id',
+            'name',
+            'measurement_unit',
         ]
