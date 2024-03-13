@@ -9,7 +9,7 @@ class ShoppingList(models.Model):
         'recipe.Recipe',
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
-        related_name='+',
+        related_name='shopping_list',
     )
     user = models.ForeignKey(
         user_model,
@@ -34,7 +34,7 @@ class Favorite(models.Model):
         'recipe.Recipe',
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
-        related_name='+',
+        related_name='favorites',
     )
     user = models.ForeignKey(
         user_model,

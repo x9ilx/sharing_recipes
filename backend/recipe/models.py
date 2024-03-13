@@ -57,7 +57,10 @@ class Recipe(models.Model):
         Ingredient, verbose_name='Ингредиенты', through='RecipeIngredients'
     )
     author = models.ForeignKey(
-        user_model, verbose_name='Автор', on_delete=models.CASCADE
+        user_model,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='recipes',
     )
 
     class Meta:

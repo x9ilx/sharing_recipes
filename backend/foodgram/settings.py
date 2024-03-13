@@ -18,7 +18,6 @@ DEBUG = os.getenv('DEBUG_MODE', '').lower() in ('true', '1', 'yes', 'y', '+')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(';')
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -35,6 +34,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'user.apps.UserConfig',
     'recipe.apps.RecipeConfig',
+    'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
