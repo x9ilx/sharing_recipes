@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from recipe.models import Recipe
-from user.models import ShoppingList, Subscribe
+from user.models import Favorite, ShoppingList, Subscribe
 
 user_model = get_user_model()
 
@@ -117,6 +117,15 @@ class SubscriptionsGetSerializer(serializers.Serializer):
 class ShoppingCatrSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingList
+        fields = [
+            'recipe',
+            'user',
+        ]
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
         fields = [
             'recipe',
             'user',

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
+from core.string_helpers import ru_plural
 from core.admin_mixins import ModelAdminElementsWidthMixIn
 
 from .models import Ingredient, MeasurimentUnit, Recipe, RecipeIngredients, Tag
@@ -78,6 +79,7 @@ class RecipeIngredientsInline(admin.TabularInline):
 class RecipeAdmin(ModelAdminElementsWidthMixIn):
 
     fields = [
+        'pub_date',
         'name',
         'text',
         'cooking_time',
@@ -86,13 +88,14 @@ class RecipeAdmin(ModelAdminElementsWidthMixIn):
         'tags',
         'author',
     ]
-    readonly_fields = ['show_image']
-    list_display = ['name', 'author']
+    readonly_fields = ['show_image', 'pub_date']
+    list_display = ['name', 'author', 'favorites_count', 'pub_date']
 
     ordering = [
+        '-pub_date',
         'name',
     ]
-    search_fields = ['name', 'author', 'tags']
+    search_fields = ['name', 'author__username', 'tags__name', 'tags__slug']
     list_filter = [
         ('author', admin.RelatedOnlyFieldListFilter),
         ('tags', admin.RelatedOnlyFieldListFilter),
@@ -109,8 +112,14 @@ class RecipeAdmin(ModelAdminElementsWidthMixIn):
                 height=obj.image.height,
             )
         )
-
     show_image.short_description = 'Текущее изображение'
+
+    def favorites_count(self, obj):
+        favorites_count = obj.favorites.all().count()
+        return mark_safe(
+            f'{favorites_count} {ru_plural(favorites_count, "раз,раза,раз")}'
+        )
+    favorites_count.short_description = 'Количество добавления в избранное'
 
 
 @admin.register(RecipeIngredients)

@@ -6,6 +6,14 @@ class OnlyAuth(permissions.BasePermission):
         return not request.user.is_anonymous
 
 
+class OnlyAuthor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return not request.user.is_anonymous
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.author or request.user.is_superuser
+
+
 class AuthorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return (

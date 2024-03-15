@@ -8,11 +8,15 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.permissions import AuthorOrReadOnly, OnlyAuth
+from core.permissions import AuthorOrReadOnly, OnlyAuthor
 from user.docs.shopping_cart_dpf import ShoppingCartDocGeneratePDF
-from user.serializers import RecipeGetMiniSerializer, ShoppingCatrSerializer
+from user.serializers import (
+    FavoriteSerializer,
+    RecipeGetMiniSerializer,
+    ShoppingCatrSerializer,
+)
 
-from .filters import RecipeFilter
+from .filters import NameParamSearchFilter, RecipeFilter
 from .models import Ingredient, Recipe, Tag
 from .serializers import (
     IngredientSerializer,
@@ -35,22 +39,20 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all().select_related('measurement_unit')
     pagination_class = None
 
-    filterset_fields = [
-        'name',
-    ]
     ordering = [
         'name',
     ]
     filter_backends = [
         DjangoFilterBackend,
-        filters.SearchFilter,
+        NameParamSearchFilter,
         filters.OrderingFilter,
     ]
     ordering_fields = [
         'name',
     ]
+
     search_fields = [
-        'name',
+        '^name',
     ]
 
 
@@ -137,10 +139,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
             create=False, request=request, kwargs=kwargs
         )
 
-    def add_to_shopping_cart(self, current_user, recipe):
-        if current_user.shopping_list.filter(recipe=recipe).exists():
+    def add_to_shopping_cart_or_favorites(
+        self, current_user, recipe_id, table
+    ):
+        if not Recipe.objects.filter(pk=recipe_id).exists():
             return Response(
-                {'errors': 'Рецепт уже добавлен в список покупок'},
+                {'errors': 'Объект не существует'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        field = getattr(current_user, table)
+        recipe = Recipe.objects.get(pk=recipe_id)
+        serializer_class = (
+            ShoppingCatrSerializer
+            if table == 'shopping_list'
+            else FavoriteSerializer
+        )
+
+        if field.filter(recipe=recipe).exists():
+            return Response(
+                {'errors': 'Объект уже добавлен в список'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -148,7 +166,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         data['user'] = current_user.pk
         data['recipe'] = recipe.pk
 
-        serializer = ShoppingCatrSerializer(data=data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         result = RecipeGetMiniSerializer(
@@ -156,14 +174,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return Response(result.data, status=status.HTTP_201_CREATED)
 
-    def delete_from_shopping_cart(self, current_user, recipe_id):
+    def delete_from_shopping_cart_or_favorites(
+        self, current_user, recipe_id, table
+    ):
+        field = getattr(current_user, table)
         recipe = get_object_or_404(Recipe, pk=recipe_id)
-        if current_user.shopping_list.filter(recipe=recipe).exists():
-            current_user.shopping_list.filter(recipe=recipe).delete()
+        if field.filter(recipe=recipe).exists():
+            field.filter(recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(
-            {'errors': 'Рецепт не добавлен в список покупок'},
+            {'errors': 'Объект не добавлен в список'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -172,29 +193,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['DELETE', 'POST'],
         url_path='shopping_cart',
         url_name='user-shopping-cart',
-        permission_classes=[OnlyAuth],
+        permission_classes=[OnlyAuthor],
     )
     def user_delete_create_shoping_cart(self, request, pk=-1):
         current_user = request.user
 
         if request.method == 'POST':
-            if not Recipe.objects.filter(pk=pk).exists():
-                return Response(
-                    {'errors': 'Рецепт не существует'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            recipe = Recipe.objects.get(pk=pk)
-            return self.add_to_shopping_cart(current_user, recipe)
+            return self.add_to_shopping_cart_or_favorites(
+                current_user, pk, 'shopping_list'
+            )
 
         if request.method == 'DELETE':
-            return self.delete_from_shopping_cart(current_user, pk)
+            return self.delete_from_shopping_cart_or_favorites(
+                current_user, pk, 'shopping_list'
+            )
 
     @action(
         detail=False,
         methods=['GET'],
         url_path='download_shopping_cart',
         url_name='download-shopping-cart',
-        permission_classes=[OnlyAuth],
+        permission_classes=[OnlyAuthor],
     )
     def user_download_shopping_cart(self, request, pk=-1):
         current_user = request.user
@@ -207,3 +226,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
         pdf = pdf_template.get_pdf()
         response.write(pdf)
         return response
+
+    @action(
+        detail=True,
+        methods=['DELETE', 'POST'],
+        url_path='favorite',
+        url_name='user-favorite',
+        permission_classes=[OnlyAuthor],
+    )
+    def user_delete_create_favorite(self, request, pk=-1):
+        current_user = request.user
+
+        if request.method == 'POST':
+            return self.add_to_shopping_cart_or_favorites(
+                current_user, pk, 'favorites'
+            )
+
+        if request.method == 'DELETE':
+            return self.delete_from_shopping_cart_or_favorites(
+                current_user, pk, 'favorites'
+            )

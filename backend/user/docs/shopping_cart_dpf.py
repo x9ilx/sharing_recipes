@@ -86,6 +86,10 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
                 ],
             )
 
+        if len(ingredients_table_data) == 0:
+            ingredients_table_data = [
+                [Paragraph(f'Список покупок пуст.', self.NORMAL_STYLE)],
+            ]
         ingredients_table = Table(
             ingredients_table_data,
             hAlign='LEFT',

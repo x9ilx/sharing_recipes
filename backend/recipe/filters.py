@@ -1,7 +1,12 @@
 import django_filters as filters
 from django.db.models import Q
+from rest_framework.filters import SearchFilter
 
-from .models import Recipe
+from .models import Recipe, Tag
+
+
+class NameParamSearchFilter(SearchFilter):
+    search_param = "name"
 
 
 class RecipeFilter(filters.FilterSet):
@@ -17,6 +22,7 @@ class RecipeFilter(filters.FilterSet):
     def filter_tag(self, queryset, name, value):
         query = Q()
         for tag in value:
-            query |= Q(tags__slug=tag)
+            if Tag.objects.filter(slug=tag).exists():
+                query |= Q(tags__slug=tag)
 
         return queryset.filter(query)
