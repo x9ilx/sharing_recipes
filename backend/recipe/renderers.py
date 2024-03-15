@@ -20,7 +20,7 @@ class SubscribeRenderer(renderers.JSONRenderer):
                 data, accepted_media_type, renderer_context
             )
 
-        except Exception as ex:
+        except:
             data = {
                 'detail': data,
             }

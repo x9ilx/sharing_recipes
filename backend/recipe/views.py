@@ -168,7 +168,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
+        serializer.save()
         result = RecipeGetMiniSerializer(
             instance=recipe, context={'request': self.request}
         )

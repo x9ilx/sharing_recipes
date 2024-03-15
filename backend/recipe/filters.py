@@ -6,7 +6,7 @@ from .models import Recipe, Tag
 
 
 class NameParamSearchFilter(SearchFilter):
-    search_param = "name"
+    search_param = 'name'
 
 
 class RecipeFilter(filters.FilterSet):

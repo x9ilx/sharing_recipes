@@ -155,38 +155,38 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
             if not 'id' in ingredient:
                 raise serializers.ValidationError(
-                    f'Необходимо указать id ингредиента'
+                    'Необходимо указать id ингредиента'
                 )
-            else:
-                ingredient_id = ingredient.get('id', 0)
-                ingredient_exists = Ingredient.objects.filter(
-                    pk=ingredient_id
-                ).exists()
 
-                if not ingredient_exists:
-                    raise serializers.ValidationError(
-                        f'Ингредиента {ingredient_id} не существует'
-                    )
+            ingredient_id = ingredient.get('id', 0)
+            ingredient_exists = Ingredient.objects.filter(
+                pk=ingredient_id
+            ).exists()
 
-                if ingredient_id in existing_ingredients:
-                    raise serializers.ValidationError(
-                        f'Ингредиент {ingredient_id} уже добавлен в список'
-                    )
+            if not ingredient_exists:
+                raise serializers.ValidationError(
+                    f'Ингредиента {ingredient_id} не существует'
+                )
 
-                existing_ingredients.append(ingredient_id)
+            if ingredient_id in existing_ingredients:
+                raise serializers.ValidationError(
+                    f'Ингредиент {ingredient_id} уже добавлен в список'
+                )
+
+            existing_ingredients.append(ingredient_id)
 
         return value
 
     def validate_tags(self, value):
         if len(value) == 0:
             raise serializers.ValidationError(
-                f'Необходимо указать хотя бы один тег'
+                'Необходимо указать хотя бы один тег'
             )
 
         equal_tags = len(set(value)) != len(value)
         if equal_tags:
             raise serializers.ValidationError(
-                f'Нельзя указывать одинаковые теги'
+                'Нельзя указывать одинаковые теги'
             )
 
         return value

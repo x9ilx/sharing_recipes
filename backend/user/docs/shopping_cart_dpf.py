@@ -24,7 +24,7 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
         )
         elements.append(flowables.HRFlowable(width='100%', spaceAfter=10))
 
-        ingredients = dict()
+        ingredients = {}
         recipes = []
         shopping_cart = (
             self.current_user.shopping_list.all()
@@ -53,7 +53,7 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
 
         elements.append(
             Paragraph(
-                f'Рецепты: ',
+                'Рецепты: ',
                 self.BOLD_STYLE,
             )
         )
@@ -69,7 +69,7 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
 
         elements.append(
             Paragraph(
-                f'Список покупок:',
+                'Список покупок:',
                 self.BOLD_STYLE,
             )
         )
@@ -88,7 +88,7 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
 
         if len(ingredients_table_data) == 0:
             ingredients_table_data = [
-                [Paragraph(f'Список покупок пуст.', self.NORMAL_STYLE)],
+                [Paragraph('Список покупок пуст.', self.NORMAL_STYLE)],
             ]
         ingredients_table = Table(
             ingredients_table_data,

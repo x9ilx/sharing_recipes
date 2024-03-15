@@ -13,12 +13,21 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='recipe',
-            options={'ordering': ['-pub_date'], 'verbose_name': 'Рецепт', 'verbose_name_plural': 'Рецепты'},
+            options={
+                'ordering': ['-pub_date'],
+                'verbose_name': 'Рецепт',
+                'verbose_name_plural': 'Рецепты',
+            },
         ),
         migrations.AddField(
             model_name='recipe',
             name='pub_date',
-            field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now, verbose_name='Дата добавления'),
+            field=models.DateTimeField(
+                auto_now_add=True,
+                db_index=True,
+                default=django.utils.timezone.now,
+                verbose_name='Дата добавления',
+            ),
             preserve_default=False,
         ),
     ]

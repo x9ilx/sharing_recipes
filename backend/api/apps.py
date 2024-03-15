@@ -1,3 +1,5 @@
+"""Модуль отвечающий за API FoodGram."""
+
 from django.apps import AppConfig
 
 

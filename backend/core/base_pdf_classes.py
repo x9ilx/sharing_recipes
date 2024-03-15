@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 
 from django.conf import settings
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from reportlab.lib.pagesizes import A4, portrait
 from reportlab.lib.styles import (
-    TA_CENTER,
     TA_RIGHT,
     ParagraphStyle,
     getSampleStyleSheet,

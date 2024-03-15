@@ -1,4 +1,6 @@
 asgiref==3.7.2
+black==22.1.0
+blue==0.9.1
 certifi==2024.2.2
 cffi==1.16.0
 chardet==5.2.0
@@ -15,8 +17,12 @@ django-templated-mail==1.1.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
 djoser==2.2.2
+flake8==4.0.0
+flake8-isort==6.1.1
 gunicorn==21.2.0
 idna==3.6
+importlib_metadata==7.0.2
+isort==5.13.2
 mccabe==0.6.1
 mypy-extensions==1.0.0
 oauthlib==3.2.2
@@ -41,3 +47,4 @@ sqlparse==0.4.4
 tomli==2.0.1
 tzdata==2024.1
 urllib3==2.2.1
+zipp==3.18.1

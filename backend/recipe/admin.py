@@ -106,12 +106,12 @@ class RecipeAdmin(ModelAdminElementsWidthMixIn):
 
     def show_image(self, obj):
         return mark_safe(
-            '<img src="{url}" width="{width}" height={height} />'.format(
-                url=obj.image.url,
-                width=obj.image.width,
-                height=obj.image.height,
+            (
+                f'<img src="{obj.image.url}" width="{obj.image.width}"'
+                f'height={obj.image.height} />'
             )
         )
+
     show_image.short_description = 'Текущее изображение'
 
     def favorites_count(self, obj):
@@ -119,6 +119,7 @@ class RecipeAdmin(ModelAdminElementsWidthMixIn):
         return mark_safe(
             f'{favorites_count} {ru_plural(favorites_count, "раз,раза,раз")}'
         )
+
     favorites_count.short_description = 'Количество добавления в избранное'
 
 
