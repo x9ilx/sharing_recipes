@@ -1,7 +1,8 @@
-from core.admin_mixins import ModelAdminElementsWidthMixIn
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+
+from core.admin_mixins import ModelAdminElementsWidthMixIn
 
 from .models import Favorite, ShoppingList, Subscribe
 

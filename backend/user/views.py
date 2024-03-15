@@ -1,13 +1,16 @@
-from core.permissions import OnlyAuth
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from recipe.renderers import SubscribeRenderer
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from user.serializers import (SubscriptionPostSerializer,
-                              SubscriptionsGetSerializer)
+
+from core.permissions import OnlyAuth
+from recipe.renderers import SubscribeRenderer
+from user.serializers import (
+    SubscriptionPostSerializer,
+    SubscriptionsGetSerializer,
+)
 
 from .permissions import BlockAnonymousUserMe
 
@@ -19,19 +22,17 @@ class FoodgramUserViewSet(UserViewSet):
         BlockAnonymousUserMe,
     ]
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        url_path='subscribe',
-        url_name='subscribe',
-        permission_classes=[OnlyAuth],
-        renderer_classes=[SubscribeRenderer],
-    )
-    def user_subscribe(self, request, id=-1):
-        author = get_object_or_404(user_model, pk=id)
-        current_user = request.user
-        recipes_limit = self.request.GET.get('recipes_limit', -1)
+    def delete_subscription(self, current_user, author):
+        if current_user.subscribes.filter(author=author).exists():
+            current_user.subscribes.filter(author=author).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
+        return Response(
+            {'errors': 'Подписка не оформлена'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def add_subscription(self, current_user, author, context):
         if current_user == author:
             return Response(
                 {'errors': 'Нельзя подписаться на самого себя'},
@@ -51,12 +52,32 @@ class FoodgramUserViewSet(UserViewSet):
         serializer = SubscriptionPostSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        context = {
-            'recipes_limit': recipes_limit,
-            'request': request,
-        }
+
         result = SubscriptionsGetSerializer(instance=instance, context=context)
         return Response(result.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True,
+        methods=['DELETE', 'POST'],
+        url_path='subscribe',
+        url_name='user-subscribe',
+        permission_classes=[OnlyAuth],
+        renderer_classes=[SubscribeRenderer],
+    )
+    def user_subscribe(self, request, id=-1):
+        author = get_object_or_404(user_model, pk=id)
+        current_user = request.user
+        recipes_limit = self.request.GET.get('recipes_limit', -1)
+
+        if request.method == 'POST':
+            context = {
+                'recipes_limit': recipes_limit,
+                'request': request,
+            }
+            return self.add_subscription(current_user, author, context)
+
+        if request.method == 'DELETE':
+            return self.delete_subscription(current_user, author)
 
     @action(
         detail=False,

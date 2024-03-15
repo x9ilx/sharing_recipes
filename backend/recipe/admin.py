@@ -1,6 +1,7 @@
-from core.admin_mixins import ModelAdminElementsWidthMixIn
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+
+from core.admin_mixins import ModelAdminElementsWidthMixIn
 
 from .models import Ingredient, MeasurimentUnit, Recipe, RecipeIngredients, Tag
 

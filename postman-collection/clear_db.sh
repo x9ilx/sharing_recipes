@@ -27,3 +27,4 @@ if [ $status -ne 0 ]; then
     exit $status;
 fi
 echo "База данных очищена."
+cd ..

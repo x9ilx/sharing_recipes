@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as BaseUserSerializer
-from recipe.models import Recipe
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from user.models import Subscribe
+
+from recipe.models import Recipe
+from user.models import ShoppingList, Subscribe
 
 user_model = get_user_model()
 
@@ -100,7 +101,6 @@ class SubscriptionsGetSerializer(serializers.Serializer):
         if recipe_limit > 0:
             recipes = recipes[:recipe_limit]
 
-        print(f'!!!!!!!!!!!!!!!!!!!!!! {recipe_limit}')
         return RecipeGetMiniSerializer(
             recipes, many=True, context=self.context
         ).data
@@ -110,5 +110,14 @@ class SubscriptionsGetSerializer(serializers.Serializer):
             'author',
             'recipes_count',
             'recipes',
+            'user',
+        ]
+
+
+class ShoppingCatrSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingList
+        fields = [
+            'recipe',
             'user',
         ]
