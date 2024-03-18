@@ -15,7 +15,7 @@ class RecipeFilter(filters.FilterSet):
         to_field_name='slug',
         method='filter_tag'
     )
-    
+
     class Meta:
         model = Recipe
         fields = ['author', 'tags']
