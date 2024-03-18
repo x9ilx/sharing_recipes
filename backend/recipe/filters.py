@@ -11,18 +11,17 @@ class NameParamSearchFilter(SearchFilter):
 
 class RecipeFilter(filters.FilterSet):
     author = filters.NumberFilter(field_name='author__pk', lookup_expr='exact')
-    tags = filters.AllValuesMultipleFilter(
-        field_name='tags__slug', method='filter_tag'
+    tags = filters.ModelMultipleChoiceFilter(
+        queryset=Tag.objects.all(),
+        to_field_name='slug',
+        method='filter_tag'
     )
-
+    
     class Meta:
         model = Recipe
         fields = ['author', 'tags']
 
     def filter_tag(self, queryset, name, value):
-        query = Q()
-        for tag in value:
-            if Tag.objects.filter(slug=tag).exists():
-                query |= Q(tags__slug=tag)
-
-        return queryset.filter(query)
+        if len(value) == 0:
+            return queryset
+        return queryset.filter(tags__in=value).order_by('-pub_date')

@@ -1,7 +1,7 @@
 version: '3.3'
 
 volumes:
-  pg_data:
+  pg_data_foodgram:
   static:
   media:
 
@@ -9,7 +9,7 @@ services:
   db:
     image: postgres:13
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data_foodgram:/var/lib/postgresql/data
     env_file: ./.env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -36,7 +36,7 @@ services:
   nginx:
     image: x9ilx/foodgram_gateway
     ports:
-      - "8000:80"
+      - "80:80"
     volumes:
       - ./infra/nginx.conf:/etc/nginx/sites-enabled/default
       - ./frontend/build:/usr/share/nginx/html/
