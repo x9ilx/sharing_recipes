@@ -22,5 +22,5 @@ class RecipeFilter(filters.FilterSet):
 
     def filter_tag(self, queryset, name, value):
         if len(value) == 0:
-            return queryset
-        return queryset.filter(tags__in=value).order_by('-pub_date')
+            return queryset.distinct()
+        return queryset.filter(tags__in=value).order_by('-pub_date').distinct()

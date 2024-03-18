@@ -94,7 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         return queryset.select_related('author').prefetch_related(
             'tags', 'ingredients'
-        )
+        ).distinct()
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
