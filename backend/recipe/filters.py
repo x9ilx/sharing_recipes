@@ -1,5 +1,4 @@
 import django_filters as filters
-from django.db.models import Q
 from rest_framework.filters import SearchFilter
 
 from .models import Recipe, Tag
