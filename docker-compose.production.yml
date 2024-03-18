@@ -34,7 +34,7 @@ services:
       - static:/static/
 
   nginx:
-    image: nginx:1.19.3
+    image: x9ilx/foodgram_gateway
     ports:
       - "8000:80"
     volumes:
