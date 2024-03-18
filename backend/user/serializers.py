@@ -86,7 +86,7 @@ class SubscriptionsGetSerializer(serializers.Serializer):
     def get_recipe_limit_context(self):
         try:
             recipe_limit = int(self.context.get('recipes_limit', -1))
-        except:
+        except Exception:
             recipe_limit = -1
 
         return recipe_limit

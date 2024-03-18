@@ -44,7 +44,7 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
                 .select_related('ingredient', 'recipe')
                 .order_by('ingredient__name')
             ):
-                if not recipe_ingredient.ingredient in ingredients:
+                if  recipe_ingredient.ingredient not in ingredients:
                     ingredients[recipe_ingredient.ingredient] = 0
 
                 ingredients[recipe_ingredient.ingredient] += (
