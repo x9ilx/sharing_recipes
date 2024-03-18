@@ -153,7 +153,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                     'Необходимо указать количество ингредиентов'
                 )
 
-            if  'id' not in ingredient:
+            if 'id' not in ingredient:
                 raise serializers.ValidationError(
                     'Необходимо указать id ингредиента'
                 )
