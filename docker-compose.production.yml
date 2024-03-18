@@ -10,7 +10,7 @@ services:
     image: postgres:13
     volumes:
       - pg_data:/var/lib/postgresql/data
-    env_file: ./backend/.env
+    env_file: ./.env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -19,7 +19,7 @@ services:
 
   backend:
     image: x9ilx/foodgram_backend
-    env_file: ./backend/.env
+    env_file: ./.env
     volumes:
       - media:/app/media/
       - static:/static/
@@ -28,7 +28,7 @@ services:
 
   frontend:
     image: x9ilx/foodgram_frontend
-    env_file: ./backend/.env
+    env_file: ./.env
     command: cp -r /app/build/. /static/
     volumes:
       - static:/static/
