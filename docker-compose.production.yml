@@ -36,7 +36,7 @@ services:
   nginx:
     image: x9ilx/foodgram_gateway
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ./infra/nginx.conf:/etc/nginx/sites-enabled/default
       - ./frontend/build:/usr/share/nginx/html/
