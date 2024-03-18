@@ -8,6 +8,7 @@ volumes:
 services:
   db:
     image: postgres:13
+    restart: always
     volumes:
       - pg_data_foodgram:/var/lib/postgresql/data
     env_file: ./.env
