@@ -205,12 +205,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
             if not ingredient_exists:
                 raise serializers.ValidationError(
-                    f'Ингредиента {ingredient['id']} не существует'
+                    f'Ингредиента {ingredient["id"]} не существует'
                 )
 
             if ingredient['id'] in existing_ingredients:
                 raise serializers.ValidationError(
-                    f'Ингредиент {ingredient['id']} уже добавлен в список'
+                    f'Ингредиент {ingredient["id"]} уже добавлен в список'
                 )
 
             existing_ingredients.add(ingredient['id'])
