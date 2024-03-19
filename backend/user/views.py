@@ -23,8 +23,10 @@ class FoodgramUserViewSet(UserViewSet):
     ]
 
     def delete_subscription(self, current_user, author):
-        if current_user.subscribes.filter(author=author).exists():
-            current_user.subscribes.filter(author=author).delete()
+        subscribe = current_user.subscribes.filter(author=author)
+
+        if subscribe.exists():
+            subscribe.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(
@@ -33,18 +35,6 @@ class FoodgramUserViewSet(UserViewSet):
         )
 
     def add_subscription(self, current_user, author, context):
-        if current_user == author:
-            return Response(
-                {'errors': 'Нельзя подписаться на самого себя'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if current_user.subscribes.filter(author=author).exists():
-            return Response(
-                {'errors': 'Подписка уже оформлена'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         data = {}
         data['user'] = current_user.pk
         data['author'] = author.pk

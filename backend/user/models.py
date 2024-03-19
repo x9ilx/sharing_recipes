@@ -27,6 +27,10 @@ class ShoppingList(models.Model):
                 name='shopping-list-recipe-user',
             )
         ]
+        ordering = ['-recipe__pub_date']
+
+    def __str__(self):
+        return f'Список покупок: {self.recipe.name}'
 
 
 class Favorite(models.Model):
@@ -52,6 +56,10 @@ class Favorite(models.Model):
                 name='favorite-recipe-user',
             )
         ]
+        ordering = ['-recipe__pub_date']
+
+    def __str__(self):
+        return f'Избранное: {self.recipe.name}'
 
 
 class Subscribe(models.Model):
@@ -77,3 +85,7 @@ class Subscribe(models.Model):
                 name='author-user',
             )
         ]
+        ordering = ['author__username']
+
+    def __str__(self):
+        return f'Подписка {self.user.username} на {self.author.username}'

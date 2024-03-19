@@ -15,7 +15,6 @@ from user.serializers import (
     RecipeGetMiniSerializer,
     ShoppingCatrSerializer,
 )
-
 from .filters import NameParamSearchFilter, RecipeFilter
 from .models import Ingredient, Recipe, Tag
 from .serializers import (
@@ -142,7 +141,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def add_to_shopping_cart_or_favorites(
         self, current_user, recipe_id, table
     ):
-        if not Recipe.objects.filter(pk=recipe_id).exists():
+        # Тоже не очень понял идею с first()
+        if not Recipe.objects.filter(pk=recipe_id).first():
             return Response(
                 {'errors': 'Объект не существует'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -179,8 +179,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ):
         field = getattr(current_user, table)
         recipe = get_object_or_404(Recipe, pk=recipe_id)
-        if field.filter(recipe=recipe).exists():
-            field.filter(recipe=recipe).delete()
+        deleted_object = field.filter(recipe=recipe)
+
+        if deleted_object.exists():
+            deleted_object.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(
@@ -195,7 +197,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='user-shopping-cart',
         permission_classes=[OnlyAuthor],
     )
-    def user_delete_create_shoping_cart(self, request, pk=-1):
+    def user_delete_create_shoping_cart(self, request, pk):
         current_user = request.user
 
         if request.method == 'POST':
@@ -215,7 +217,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download-shopping-cart',
         permission_classes=[OnlyAuthor],
     )
-    def user_download_shopping_cart(self, request, pk=-1):
+    def user_download_shopping_cart(self, request):
         current_user = request.user
 
         pdf_template = ShoppingCartDocGeneratePDF(
@@ -234,7 +236,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='user-favorite',
         permission_classes=[OnlyAuthor],
     )
-    def user_delete_create_favorite(self, request, pk=-1):
+    def user_delete_create_favorite(self, request, pk):
         current_user = request.user
 
         if request.method == 'POST':

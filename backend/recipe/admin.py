@@ -3,7 +3,6 @@ from django.utils.safestring import mark_safe
 
 from core.string_helpers import ru_plural
 from core.admin_mixins import ModelAdminElementsWidthMixIn
-
 from .models import Ingredient, MeasurimentUnit, Recipe, RecipeIngredients, Tag
 
 

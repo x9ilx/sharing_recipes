@@ -7,6 +7,7 @@ from rest_framework.validators import UniqueValidator
 from recipe.models import Recipe
 from user.models import Favorite, ShoppingList, Subscribe
 
+
 user_model = get_user_model()
 
 
@@ -47,8 +48,7 @@ class UserSerializer(BaseUserSerializer):
         if current_user.is_anonymous:
             return False
 
-        subscribe = current_user.subscribes.filter(author=obj).exists()
-        return subscribe
+        return current_user.subscribes.filter(author=obj).exists()
 
 
 class RecipeGetMiniSerializer(serializers.ModelSerializer):
@@ -77,6 +77,17 @@ class SubscriptionPostSerializer(serializers.ModelSerializer):
             'user',
         ]
 
+    def validate(self, attrs):
+        if attrs['user'] == attrs['author']:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя'
+            )
+        if attrs['user'].subscribes.filter(author=attrs['author']).exists():
+            raise serializers.ValidationError(
+                'Подписка уже оформлена'
+            )
+        return attrs
+
 
 class SubscriptionsGetSerializer(serializers.Serializer):
     author = UserSerializer(required=True)
@@ -96,7 +107,7 @@ class SubscriptionsGetSerializer(serializers.Serializer):
 
     def get_recipes(self, obj):
         recipe_limit = self.get_recipe_limit_context()
-        recipes = Recipe.objects.filter(author=obj.author)
+        recipes = obj.author.recipes.all()
 
         if recipe_limit > 0:
             recipes = recipes[:recipe_limit]

@@ -1,35 +1,57 @@
 from django.contrib.auth import get_user_model
+from django.core import validators
 from django.db import models
+
+from recipe import constants
+
 
 user_model = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField('Наименование', max_length=200)
-    color = models.CharField('Цветовой код (HEX)', max_length=7)
-    slug = models.SlugField('Уникальный slug', unique=True, max_length=200)
+    name = models.CharField(
+        'Наименование',
+        max_length=constants.MAX_LENGTH_NAME_FIELD
+    )
+    color = models.CharField(
+        'Цветовой код (HEX)',
+        max_length=constants.MAX_LENGTH_COLOR_FIELD
+    )
+    slug = models.SlugField(
+        'Уникальный slug',
+        unique=True,
+        max_length=constants.MAX_LENGTH_SLUG_FIELD
+    )
 
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
 
 
 class MeasurimentUnit(models.Model):
-    name = models.CharField('Наименование', max_length=200)
+    name = models.CharField(
+        'Наименование',
+        max_length=constants.MAX_LENGTH_NAME_FIELD
+    )
 
     class Meta:
         verbose_name = 'Единица измерения'
         verbose_name_plural = 'Единицы измерения'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
 
 
 class Ingredient(models.Model):
-    name = models.CharField('Наименование', max_length=200)
+    name = models.CharField(
+        'Наименование',
+        max_length=constants.MAX_LENGTH_NAME_FIELD
+    )
     measurement_unit = models.ForeignKey(
         MeasurimentUnit,
         verbose_name='Единица измерения',
@@ -40,15 +62,29 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Игредиент'
         verbose_name_plural = 'Ингредиенты'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
 
 
 class Recipe(models.Model):
-    name = models.CharField('Наименование', max_length=200)
+    name = models.CharField(
+        'Наименование',
+        max_length=constants.MAX_LENGTH_NAME_FIELD
+    )
     text = models.TextField('Описание')
-    cooking_time = models.PositiveIntegerField('Время приготовления (минуты)')
+    cooking_time = models.PositiveIntegerField(
+        'Время приготовления (минуты)',
+        validators=[
+            validators.MinValueValidator(
+                limit_value=constants.MIN_INTEGER_FIELD
+            ),
+            validators.MaxValueValidator(
+                limit_value=constants.MAX_INTEGER_FIELD
+            ),
+        ]
+    )
     image = models.ImageField(
         upload_to='recipe/images/', verbose_name='Файл с изображением'
     )
@@ -88,7 +124,17 @@ class RecipeIngredients(models.Model):
         on_delete=models.CASCADE,
         related_name='+',
     )
-    amount = models.PositiveIntegerField('Количество')
+    amount = models.PositiveIntegerField(
+        'Количество',
+        validators=[
+            validators.MinValueValidator(
+                limit_value=constants.MIN_INTEGER_FIELD
+            ),
+            validators.MaxValueValidator(
+                limit_value=constants.MAX_INTEGER_FIELD
+            ),
+        ]
+    )
 
     class Meta:
         verbose_name = 'Ингредиенты в рецепте'
@@ -99,3 +145,7 @@ class RecipeIngredients(models.Model):
                 name='recipe-ingredient',
             )
         ]
+        ordering = ['recipe__pub_date']
+
+    def __str__(self) -> str:
+        return f'{self.recipe}: {self.ingredient}'

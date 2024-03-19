@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
+from recipe import constants
 from recipe.models import (
     Ingredient,
     MeasurimentUnit,
@@ -12,6 +13,7 @@ from recipe.models import (
     Tag,
 )
 from user.serializers import UserSerializer
+
 
 user_model = get_user_model()
 
@@ -58,6 +60,7 @@ class IngredientSerializer(serializers.ModelSerializer):
             'measurement_unit',
         ]
 
+        extra_kwargs = {field: {'read_only': True} for field in fields}
 
 class RecipeIngredientsSerializer(serializers.ModelSerializer):
     name = serializers.StringRelatedField(source='ingredient', read_only=True)
@@ -72,6 +75,24 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
             'name',
             'amount',
             'measurement_unit',
+        ]
+
+
+class RecipeCreateIngredientsSerializer(serializers.Serializer):
+    id = serializers.IntegerField(
+        required=True,
+        min_value=constants.MIN_INTEGER_FIELD,
+    )
+    amount = serializers.IntegerField(
+        required=True,
+        min_value=constants.MIN_INTEGER_FIELD,
+        max_value=constants.MAX_INTEGER_FIELD,
+    )
+    class Meta:
+        model = RecipeIngredients
+        fields = [
+            'id',
+            'amount',
         ]
 
 
@@ -121,11 +142,40 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True, required=True
+        queryset=Tag.objects.all(), many=True, required=True,
     )
     image = Base64ImageField()
-    ingredients = serializers.ListField(required=True)
-    cooking_time = serializers.IntegerField(min_value=1)
+    # Я не очень понял, как использовать сериализер игредиента, если в нём нет
+    # необходимых полей (amount) и есть лишние (все остальные, кроме id).
+    # Еще я писал такую штуку, в README:
+    # При попытке, неавторизованного пользователя, зайти на страницу любого
+    # другого - происходит редирект на страницу логина.
+    # При тесте API доступ к данным пользоваталей, при попытке запросить
+    # их неавторизованными пользователями, есть и ответ верен.
+    # Вообще при любых попытках получиться информацию о пользователе -
+    # возвращает ожидаемый ответ, а вот при взаимодействии фронтенда с
+    # API - редирект на страницу логина.
+    # возможно, во фронте, вот это:
+    # <ProtectedRoute
+    #        exact
+    #        path='/user/:id'
+    #        component={User}
+    #        loggedIn={loggedIn}
+    #        updateOrders={updateOrders}
+    #      />
+    # Не должно быть в "ProtectedRoute", так как в условиях задачи необходимо,
+    # чтобы неавторизованный пользователь мог зайти на страницу любого
+    # пользователя, но не мог попасть в user/me/
+
+    ingredients = RecipeCreateIngredientsSerializer(
+        many=True,
+        required=True,
+        allow_empty=False,
+    )
+    cooking_time = serializers.IntegerField(
+        min_value=constants.MIN_INTEGER_FIELD,
+        max_value=constants.MAX_INTEGER_FIELD,
+    )
 
     class Meta:
         model = Recipe
@@ -141,39 +191,29 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {field: {'required': True} for field in fields}
 
     def validate_ingredients(self, value):
-        if not isinstance(value, list) or not len(value) > 0:
-            raise serializers.ValidationError('Обязательное поле')
+        existing_ingredients = set()
 
-        existing_ingredients = []
         for ingredient in value:
-            amount = ingredient.get('amount', 0)
-
-            if amount == 0:
-                raise serializers.ValidationError(
-                    'Необходимо указать количество ингредиентов'
-                )
-
             if 'id' not in ingredient:
                 raise serializers.ValidationError(
                     'Необходимо указать id ингредиента'
                 )
 
-            ingredient_id = ingredient.get('id', 0)
             ingredient_exists = Ingredient.objects.filter(
-                pk=ingredient_id
+                pk=ingredient['id']
             ).exists()
 
             if not ingredient_exists:
                 raise serializers.ValidationError(
-                    f'Ингредиента {ingredient_id} не существует'
+                    f'Ингредиента {ingredient['id']} не существует'
                 )
 
-            if ingredient_id in existing_ingredients:
+            if ingredient['id'] in existing_ingredients:
                 raise serializers.ValidationError(
-                    f'Ингредиент {ingredient_id} уже добавлен в список'
+                    f'Ингредиент {ingredient['id']} уже добавлен в список'
                 )
 
-            existing_ingredients.append(ingredient_id)
+            existing_ingredients.add(ingredient['id'])
 
         return value
 
@@ -196,13 +236,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             recipe.tags.add(tag)
 
     def recipe_add_ingredients(self, recipe, ingredients):
-        for ingredient in ingredients:
-            recipe_ingredients = RecipeIngredients.objects.create(
+        recipe_ingredients = [
+            RecipeIngredients(
                 recipe=recipe,
-                ingredient=Ingredient.objects.get(pk=ingredient['id']),
-                amount=ingredient['amount'],
-            )
-            recipe.recipe_ingredients.add(recipe_ingredients)
+                ingredient_id=ingredient['id'],
+                amount=ingredient['amount']
+            ) for ingredient in ingredients
+        ]
+        RecipeIngredients.objects.bulk_create(recipe_ingredients)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
