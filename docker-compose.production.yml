@@ -1,7 +1,8 @@
 version: '3.3'
 
 volumes:
-  pg_data_foodgram:
+  pg_data_foodgram: {}
+  postgresdata: {}
   static:
   media:
 
