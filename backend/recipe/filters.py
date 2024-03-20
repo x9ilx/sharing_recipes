@@ -11,10 +11,11 @@ class NameParamSearchFilter(FilterSet):
         fields = ['name']
 
     def filter_name(self, queryset, name, value):
-        queryset_is_start_with = Ingredient.objects.filter(
+        copy_queryset = queryset
+        queryset_is_start_with = queryset.filter(
             name__istartswith=value
         ).order_by('name')
-        queryset_icontains = Ingredient.objects.filter(
+        queryset_icontains = copy_queryset.filter(
             name__icontains=value
         ).order_by('name')
         return queryset_is_start_with.union(queryset_icontains, all=True)
