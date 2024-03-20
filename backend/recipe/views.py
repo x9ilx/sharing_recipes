@@ -127,7 +127,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def add_to_shopping_cart_or_favorites(
         self, current_user, recipe_id, table
     ):
-# Тоже не очень понял идею с first()
+        # Тоже не очень понял идею с first()
         recipe = Recipe.objects.filter(pk=recipe_id).first()
 
         if not recipe:

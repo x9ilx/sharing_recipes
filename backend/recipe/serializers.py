@@ -62,6 +62,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {field: {'read_only': True} for field in fields}
 
+
 class RecipeIngredientsSerializer(serializers.ModelSerializer):
     name = serializers.StringRelatedField(source='ingredient', read_only=True)
     measurement_unit = serializers.StringRelatedField(
@@ -88,6 +89,7 @@ class RecipeCreateIngredientsSerializer(serializers.Serializer):
         min_value=constants.MIN_INTEGER_FIELD,
         max_value=constants.MAX_INTEGER_FIELD,
     )
+
     class Meta:
         model = RecipeIngredients
         fields = [
