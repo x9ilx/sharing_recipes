@@ -1,26 +1,20 @@
-import django_filters as filters
-from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import filters, FilterSet
 
-from .models import Recipe, Tag
-
-
-class NameParamSearchFilter(SearchFilter):
-    search_param = 'name'
+from recipe.models import Ingredient
 
 
-class RecipeFilter(filters.FilterSet):
-    author = filters.NumberFilter(field_name='author__pk', lookup_expr='exact')
-    tags = filters.ModelMultipleChoiceFilter(
-        queryset=Tag.objects.all(),
-        to_field_name='slug',
-        method='filter_tag'
-    )
+class NameParamSearchFilter(FilterSet):
+    name = filters.CharFilter(method='filter_name')
 
     class Meta:
-        model = Recipe
-        fields = ['author', 'tags']
+        model = Ingredient
+        fields = ['name']
 
-    def filter_tag(self, queryset, name, value):
-        if len(value) == 0:
-            return queryset.distinct()
-        return queryset.filter(tags__in=value).order_by('-pub_date').distinct()
+    def filter_name(self, queryset, name, value):
+        queryset_is_start_with = Ingredient.objects.filter(
+            name__istartswith=value
+        ).order_by('name')
+        queryset_icontains = Ingredient.objects.filter(
+            name__icontains=value
+        ).order_by('name')
+        return queryset_is_start_with.union(queryset_icontains, all=True)

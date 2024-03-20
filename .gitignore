@@ -134,3 +134,4 @@ dmypy.json
 collected_static
 media
 db copy.sqlite3
+/data/db/*

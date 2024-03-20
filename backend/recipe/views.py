@@ -3,8 +3,7 @@ from io import BytesIO
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -15,7 +14,7 @@ from user.serializers import (
     RecipeGetMiniSerializer,
     ShoppingCatrSerializer,
 )
-from .filters import NameParamSearchFilter, RecipeFilter
+from .filters import NameParamSearchFilter
 from .models import Ingredient, Recipe, Tag
 from .serializers import (
     IngredientSerializer,
@@ -38,21 +37,10 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all().select_related('measurement_unit')
     pagination_class = None
 
-    ordering = [
+    filterset_fields = [
         'name',
     ]
-    filter_backends = [
-        DjangoFilterBackend,
-        NameParamSearchFilter,
-        filters.OrderingFilter,
-    ]
-    ordering_fields = [
-        'name',
-    ]
-
-    search_fields = [
-        '^name',
-    ]
+    filterset_class = NameParamSearchFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -61,26 +49,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [
         AuthorOrReadOnly,
     ]
-    filterset_fields = [
-        'author',
-        'tags__slug',
-    ]
-    filterset_class = RecipeFilter
 
-    def filter_queryset(self, queryset):
-        filter_backends = (DjangoFilterBackend,)
-
-        for backend in list(filter_backends):
-            queryset = backend().filter_queryset(
-                self.request, queryset, view=self
-            )
-        return queryset
-
+    # убрал кастомный фильтр, так как подумал, что уже анализируются параметры
+    # сдесь, и зачем городить что-то сверху,а пихать все в фильтр мне
+    # не нравится)
     def get_queryset(self):
         queryset = Recipe.objects.all()
+
         current_user = self.request.user
         is_in_shopping_cart = self.request.GET.get('is_in_shopping_cart', '0')
         is_favorited = self.request.GET.get('is_favorited', '0')
+        author = self.request.GET.get('author', None)
+        tags = self.request.GET.getlist('tags', None)
 
         if not current_user.is_anonymous:
             if is_in_shopping_cart == '1':
@@ -91,9 +71,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if is_favorited == '1':
                 queryset = Recipe.objects.filter(favorites__user=current_user)
 
+        if tags:
+            queryset = queryset.filter(tags__slug__in=tags)
+
+        if author:
+            queryset = queryset.filter(author_id=author)
+
         return queryset.select_related('author').prefetch_related(
             'tags', 'ingredients'
-        ).distinct()
+        ).distinct().order_by('-pub_date')
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -141,15 +127,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def add_to_shopping_cart_or_favorites(
         self, current_user, recipe_id, table
     ):
-        # Тоже не очень понял идею с first()
-        if not Recipe.objects.filter(pk=recipe_id).first():
+# Тоже не очень понял идею с first()
+        recipe = Recipe.objects.filter(pk=recipe_id).first()
+
+        if not recipe:
             return Response(
                 {'errors': 'Объект не существует'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         field = getattr(current_user, table)
-        recipe = Recipe.objects.get(pk=recipe_id)
+
         serializer_class = (
             ShoppingCatrSerializer
             if table == 'shopping_list'
