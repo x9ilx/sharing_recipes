@@ -2,8 +2,9 @@ LAST_DIGIT = 10
 LAST_TWO_DIGIT = 100
 
 NOMINATIVE_CASE = 0
-GENITIVE_CASE=  1
+GENITIVE_CASE = 1
 DATIVE_CASE = 2
+
 
 def ru_plural(value, variants):
     variants = variants.split(',')
