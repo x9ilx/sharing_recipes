@@ -11,15 +11,35 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import SimpleDocTemplate
 
+DEFAULT_RIGHT_MARGIN = 10
+DEFAULT_LEFT_MARGIN = 15
+DEFAULT_TOP_MARGIN = 10
+DEFAULT_BOTTOM_MARGIN = 5
+DEFAULT_LEADING = 14
+
+NORMAL_FONT_SIZE = 9
+
+RIGHT_HEADER_STYLE_FONT_SIZE = 8
+
+BOLD_FONT_SIZE = 12
+BOLD_LEADING = 18
+
+LIST_STYLE_FONT_SIZE = 12
+LIST_STYLE_SPACE_AFTER = 2
+LIST_STYLE_SPACE_BEFORE = 2
+LIST_STYLE_LIST_INDENT = 12
+LIST_STYLE_BULLET_FONT_SIZE = 9
+LIST_STYLE_BULLET_INDENT = 7
+
 
 class BaseDocPortraitTemplate(SimpleDocTemplate):
     def __init__(
         self,
         filename,
-        right_margin=10,
-        left_margin=15,
-        top_margin=10,
-        bottom_margin=5,
+        right_margin=DEFAULT_RIGHT_MARGIN,
+        left_margin=DEFAULT_LEFT_MARGIN,
+        top_margin=DEFAULT_TOP_MARGIN,
+        bottom_margin=DEFAULT_BOTTOM_MARGIN,
         pagesize=portrait(A4),
         **kw,
     ):
@@ -45,7 +65,6 @@ class BaseDocPortraitTemplate(SimpleDocTemplate):
 
 
 class BaseDocsPDF(ABC):
-    COLORS_BLACK_COLOR = (0, 0, 0)
     styles = getSampleStyleSheet()
 
     def __init__(self, buffer):
@@ -56,33 +75,33 @@ class BaseDocsPDF(ABC):
         self.NORMAL_STYLE = ParagraphStyle(
             name='doc_header',
             fontName='OpenSans',
-            fontSize=9,
-            leading=14,
+            fontSize=NORMAL_FONT_SIZE,
+            leading=DEFAULT_LEADING,
         )
         self.BOLD_STYLE = ParagraphStyle(
             name='BOLD_STYLE',
             fontName='OpenSans-Bold',
-            fontSize=12,
-            leading=18,
+            fontSize=BOLD_FONT_SIZE,
+            leading=BOLD_LEADING,
         )
         self.RIGHT_HEADER_STYLE = ParagraphStyle(
             name='Header',
             fontName='OpenSans',
-            fontSize=8,
-            leading=14,
+            fontSize=RIGHT_HEADER_STYLE_FONT_SIZE,
+            leading=DEFAULT_LEADING,
             alignment=TA_RIGHT,
         )
         self.LIST_STYLE = ParagraphStyle(
             name='ListStyle',
             fontName='OpenSans',
-            fontSize=10,
-            leading=14,
-            spaceAfter=2,
-            spaceBefore=2,
-            leftIndent=12,
+            fontSize=LIST_STYLE_FONT_SIZE,
+            leading=DEFAULT_LEADING,
+            spaceAfter=LIST_STYLE_SPACE_AFTER,
+            spaceBefore=LIST_STYLE_SPACE_BEFORE,
+            leftIndent=LIST_STYLE_LIST_INDENT,
             bulletAnchor='start',
-            bulletFontSize=9,
-            bulletIndent=7,
+            bulletFontSize=LIST_STYLE_BULLET_FONT_SIZE,
+            bulletIndent=LIST_STYLE_BULLET_INDENT,
         )
 
     @abstractmethod

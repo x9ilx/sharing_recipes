@@ -10,10 +10,12 @@ from user.models import Favorite, ShoppingList, Subscribe
 
 user_model = get_user_model()
 
+EMAIL_FIELD_MAX_LENGTH = 254
+
 
 class UserCreateSerializer(BaseUserCreateSerializer):
     email = serializers.EmailField(
-        max_length=254,
+        max_length=EMAIL_FIELD_MAX_LENGTH,
         validators=[UniqueValidator(queryset=user_model.objects.all())],
     )
 

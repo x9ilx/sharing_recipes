@@ -5,6 +5,10 @@ from reportlab.platypus import Paragraph, Spacer, Table, flowables
 from core.base_pdf_classes import BaseDocPortraitTemplate, BaseDocsPDF
 
 
+SPACE_AFTER_STRING = 5
+SPACE_AFTER_HR = 10
+
+
 class ShoppingCartDocGeneratePDF(BaseDocsPDF):
     def __init__(self, buffer, current_user):
         self.current_user = current_user
@@ -22,7 +26,12 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
                 self.RIGHT_HEADER_STYLE,
             ),
         )
-        elements.append(flowables.HRFlowable(width='100%', spaceAfter=10))
+        elements.append(
+            flowables.HRFlowable(
+                width='100%',
+                spaceAfter=SPACE_AFTER_HR
+            )
+        )
 
         ingredients = {}
         recipes = []
@@ -65,7 +74,7 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
                     self.LIST_STYLE,
                 )
             )
-        elements.append(Spacer(doc.width, 5))
+        elements.append(Spacer(doc.width, SPACE_AFTER_STRING))
 
         elements.append(
             Paragraph(
@@ -95,8 +104,13 @@ class ShoppingCartDocGeneratePDF(BaseDocsPDF):
             hAlign='LEFT',
         )
         elements.append(ingredients_table)
-        elements.append(Spacer(doc.width, 5))
-        elements.append(flowables.HRFlowable(width='100%', spaceAfter=10))
+        elements.append(Spacer(doc.width, SPACE_AFTER_STRING))
+        elements.append(
+            flowables.HRFlowable(
+                width='100%',
+                spaceAfter=SPACE_AFTER_HR
+            )
+        )
 
         doc.build(elements)
         pdf = self.buffer.getvalue()

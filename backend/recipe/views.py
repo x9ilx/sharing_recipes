@@ -50,9 +50,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         AuthorOrReadOnly,
     ]
 
-    # убрал кастомный фильтр, так как подумал, что уже анализируются параметры
-    # здесь, и зачем городить что-то сверху,а пихать все в фильтр мне
-    # не нравится)
     def get_queryset(self):
         queryset = Recipe.objects.all()
 
@@ -127,7 +124,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def add_to_shopping_cart_or_favorites(
         self, current_user, recipe_id, table
     ):
-        # Тоже не очень понял идею с first()
         recipe = Recipe.objects.filter(pk=recipe_id).first()
 
         if not recipe:
